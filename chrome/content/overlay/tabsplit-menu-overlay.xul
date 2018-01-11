@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<overlay id="tabsplit-menu-overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <panelmultiview id="appMenu-multiView">
+    <panelview id="tabsplit-menu" class="PanelUI-subView">
+      <vbox class="panel-subview-body">
+
+        <hbox class="tabsplit-menu-header">
+          <!-- TODO: L10n for label-->
+          <label>Edit layout</label>
+        </hbox>
+
+        <hbox class="tabsplit-menu-body" pack="center">
+          <!-- TODO: Replace the buttons with the real image-->
+          <button class="tabsplit-menu-button"
+                  label="1 : 2"
+                  data-tabsplit-split-option="vertical-1:2"
+                  accesskey="3">
+          </button>
+          <splitter class="tabsplit-menu-splitter"></splitter>
+          <button class="tabsplit-menu-button"
+                  label="1 : 1"
+                  data-tabsplit-split-option="vertical-1:1"
+                  accesskey="2">
+          </button>
+          <splitter class="tabsplit-menu-splitter"></splitter>
+          <button class="tabsplit-menu-button"
+                  label="2 : 1"
+                  data-tabsplit-split-option="vertical-2:1"
+                  accesskey="1">
+          </button>
+        </hbox>
+
+        <hbox class="tabsplit-menu-footer" pack="center">
+          <!-- TODO: L10n for label and accesskey-->
+          <button class="tabsplit-menu-button tabsplit-menu-unsplit-all-button"
+                  label="Unsplit all tabs"
+                  flex="1"
+                  accesskey="U"/>
+        </hbox>
+
+      </vbox>
+    </panelview>
+  </panelmultiview>
+</overlay>

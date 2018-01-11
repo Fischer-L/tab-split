@@ -26,8 +26,11 @@ TabSplit.view = {
   // The column splitter
   _cSplitter: null,
 
-  // The #tabsplit-menupanel
-  _menuPanel: null,
+  // The #tabsplit-button
+  _tabSplitButton: null,
+
+  // The #tabsplit-menu
+  _menu: null,
 
   /**
    * @params params {Object}
@@ -49,8 +52,8 @@ TabSplit.view = {
 
   async _addTabSplitButton() {
     console.log('TMP> tabsplit-view - _addTabSplitButton');
-    let buttonForThisWindow = win.document.getElementById(this.ID_TABSPLIT_BUTTON);
-    if (buttonForThisWindow) {
+    this._tabSplitButton = win.document.getElementById(this.ID_TABSPLIT_BUTTON);
+    if (this._tabSplitButton) {
       return;
     }
 
@@ -70,43 +73,55 @@ TabSplit.view = {
         // TODO: Should we have "Tab Split" l10n?
         label: "Tab Split",
         tooltiptext: "Tab Split",
-        defaultArea: "nav-bar",
+        defaultArea: "toolbar",
         localized: false,
-        onCommand: e => {
-          console.log('TMP> tabsplit-view - _addTabSplitButton - onCommand', e.target);
-        },
       });
-      console.log('TMP> tabsplit-view - _addTabSplitButton - createWidget', w.id);
       // Explicitly put the button on the nav bar
       CustomizableUI.addWidgetToArea(this.ID_TABSPLIT_BUTTON, "nav-bar");
     });
-    
-    buttonForThisWindow = win.document.getElementById(this.ID_TABSPLIT_BUTTON);
-    buttonForThisWindow.addEventListener("command", async e => {
+
+    this._tabSplitButton = win.document.getElementById(this.ID_TABSPLIT_BUTTON);
+    this._tabSplitButton.classList.add("subviewbutton-nav");
+    this._tabSplitButton.setAttribute("closemenu", "none");
+    this._tabSplitButton.setAttribute(
+      "data-tabsplit-tabbrowser-id", this._gBrowser.getAttribute("data-tabsplit-tabbrowser-id"));
+
+    this._tabSplitButton.addEventListener("command", async e => {
       let tab = this._utils.getTabByLinkedPanel(this._state.selectedLinkedPanel);
-      // When the status is inactive and the button is clicked,
+      // When the status is inactive or the current tab is not split,
       // we notify the outside listener that a user is commanding to split tab
       // so the outside listener can know time to activate and split tabs.
       if (this._state.status == "status_inactive" || !tab.getAttribute("data-tabsplit-tab-group-id")) {
+        // In case that the tabsplit button is inside the overflow menu,
+        // we wanna close the overflow menu while spliting tabs.
+        CustomizableUI.hidePanelForNode(this._tabSplitButton);
         this._listener.onCommandSplitTab();
         return;
       }
 
       // If the status is active and the current selected tab is being splitted,
       // let's open menu panel to offer more options to users.
-      if (!this._menuPanel) {
-        await this._addMenuPanel();
+      if (!this._menu) {
+        await this._addMenu();
       }
-      if (this._menuPanel.state == "closed") {
-        let anchor = win.document.getAnonymousElementByAttribute(e.target, "class", "toolbarbutton-icon");
-        this._menuPanel.openPopup(anchor, "bottomcenter topright", 0, 0, false, null);
-      } else if (this._menuPanel.state == "open") {
-        this._menuPanel.hidePopup();
+      let areaType = CustomizableUI.getWidget(this.ID_TABSPLIT_BUTTON).areaType;
+      switch (areaType) {
+        case "toolbar":
+          let parentPanel = this._menu.closest("panel");
+          let state = parentPanel ? parentPanel.state : "closed";
+          if (state == "open") {
+            CustomizableUI.hidePanelForNode(this._menu);
+          } else if (state == "closed") {
+            PanelUI.showSubView("tabsplit-menu", this._tabSplitButton, e);
+          }
+          break;
+
+        case "menu-panel":
+          PanelUI.showSubView("tabsplit-menu", this._tabSplitButton, e);
+          break;
       }
     });
-    buttonForThisWindow.setAttribute(
-      "data-tabsplit-tabbrowser-id", this._gBrowser.getAttribute("data-tabsplit-tabbrowser-id"));
-    console.log('TMP> tabsplit-view - _addTabSplitButton - buttonForThisWindow =', buttonForThisWindow);
+    console.log('TMP> tabsplit-view - _addTabSplitButton - this._tabSplitButton =', this._tabSplitButton);
   },
 
   _removeTabSplitButton() {
@@ -115,30 +130,35 @@ TabSplit.view = {
     CustomizableUI.destroyWidget(this.ID_TABSPLIT_BUTTON);
   },
 
-  async _addMenuPanel() {
-    if (this._menuPanel) {
+  async _addMenu() {
+    if (this._menu) {
       return;
     }
     await new Promise(resolve => {
-      win.document.loadOverlay("chrome://tabsplit/content/overlay/tabsplit-menupanel-overlay.xul", resolve);
+      win.document.loadOverlay("chrome://tabsplit/content/overlay/tabsplit-menu-overlay.xul", resolve);
     });
-    console.log('TMP> tabsplit-view - tabsplit-menupanel-overlay.xul loaded');
+    console.log('TMP> tabsplit-view - tabsplit-menu-overlay.xul loaded');
 
-    this._menuPanel = win.document.getElementById("tabsplit-menupanel");
-    this._menuPanel.addEventListener("click", e => {
-      this._menuPanel.hidePopup();
-      if (e.target.id == "tabsplit-menupanel-unsplit-all-button") {
+    this._menu = win.document.getElementById("tabsplit-menu");
+    this._menu.addEventListener("click", e => {
+      let actionTaken = null;
+      if (e.target.classList.contains("tabsplit-menu-unsplit-all-button")) {
+        actionTaken = true;
         this._listener.onCommandUnsplitTabsAll();
-      } else if (e.target.classList.contains("tabsplit-menupanel-split-option")) {
+      } else if (e.target.hasAttribute("data-tabsplit-split-option")) {
+        actionTaken = true;
         this._listener.onCommandSplitOption(e.target.getAttribute("data-tabsplit-split-option"));
+      }
+      if (actionTaken) {
+        CustomizableUI.hidePanelForNode(this._menu);
       }
     });
   },
 
-  _removeMenuPanel() {
-    if (this._menuPanel) {
-      this._menuPanel.remove();
-      this._menuPanel = null;
+  _removeMenu() {
+    if (this._menu) {
+      this._menu.remove();
+      this._menu = null;
     }
   },
 
@@ -398,7 +418,7 @@ TabSplit.view = {
             this._clearTabDistributions();
             this._clearSplitPageClickListeners();
             if (status == "status_destroyed") {
-              this._removeMenuPanel();
+              this._removeMenu();
               this._removeTabSplitButton();
               this._listener = this._gBrowser = this._utils = this._store = null;
               console.log("TMP> tabsplit-view - go status_destroyed at", Date.now());

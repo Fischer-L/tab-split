@@ -50,69 +50,78 @@
   margin: 0;
 }
 
-#tabsplit-menupanel .panel-arrowcontent {
+#tabsplit-menu .panel-arrowcontent {
   margin: 0;
   padding: 0;
 }
 
-#tabsplit-menupanel-header,
-#tabsplit-menupanel-body {
-  padding: 18px 16px;
+.tabsplit-menu-header,
+.tabsplit-menu-body {
+  padding: 20px 16px;
 }
 
-#tabsplit-menupanel-header {
+.tabsplit-menu-header {
   padding-bottom: 0;
 }
 
-#tabsplit-menupanel-header > label {
+#customizationui-widget-multiview .tabsplit-menu-header {
+  padding-top: 14px;
+}
+
+#widget-overflow .tabsplit-menu-header {
+  padding-top: 10px;
+}
+
+.tabsplit-menu-header > label {
   font-size: 1.2rem;
   color: #707070;
-  margin: 0;
 }
 
-.tabsplit-menupanel-button {
+#customizationui-widget-multiview .tabsplit-menu-header > label {
+  margin-inline-start: 8px;
+}
+
+.tabsplit-menu-splitter {
   border: 0;
   margin: 0;
-  padding: 0;
-  -moz-appearance: none;
+  padding: 0 12px;
+  background: none;
 }
 
-.tabsplit-menupanel-split-option {
+#widget-overflow .tabsplit-menu-splitter {
+  padding: 0 22px;
+}
+
+.tabsplit-menu-footer {
+  margin-bottom: -6px;
+}
+
+.tabsplit-menu-button {
+  border: 1px solid #e0e0e0;
+  margin: 0;
+  padding: 0;
   width: 50px;
   height: 50px;
   min-width: 0;
   font-weight: bold;
   color: #565656;
   background: #f2f2f2;
-  border: 1px solid #e0e0e0;
+  -moz-appearance: none;
 }
 
-.tabsplit-menupanel-splitter {
-  border: 0;
-  margin: 0;
-  padding: 0 10px;
-  background: none;
-}
-
-#tabsplit-menupanel-footer {
-  width: 100%;
-  border-top: 1px solid #e5e5e5;
-}
-
-#tabsplit-menupanel-unsplit-all-button {
+.tabsplit-menu-button.tabsplit-menu-unsplit-all-button {
   width: 100%;
   padding: 12px 0;
   font-size: 1.1rem;
   color: #e24f4f;
   background: #ebebeb;
+  font-weight: normal;
 }
 
-.tabsplit-menupanel-split-option:hover,
-#tabsplit-menupanel-unsplit-all-button:hover {
+.tabsplit-menu-button:hover {
   background: #e5e5e5; 
 }
 
-.tabsplit-menupanel-split-option:active,
-#tabsplit-menupanel-unsplit-all-button:active {
+.tabsplit-menu-button:active {
   background: #e0e0e0; 
 }
