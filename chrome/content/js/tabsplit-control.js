@@ -216,6 +216,7 @@ TabSplit.control = {
 
   /* The store listeners */
   onStateChange(store, tabGroupsDiff) {
+    console.error(new Error("TMP"));
     this._state = store.getState();
     console.log("TMP> tabsplit-control - onStateChange", this._state);
     let { status, tabGroupIds } = this._state;
@@ -458,11 +459,14 @@ TabSplit.control = {
 
   onResize() {
     win.requestAnimationFrame(() => {
-      console.log("TMP> tabsplit-control - onResize");
-      this._store.update({
-        type: "update_tabbrowser_width",
-        args: { tabbrowserWidth: this._gBrowser.boxObject.width }
-      });
+      let currentWidth = this._gBrowser.boxObject.width;
+      if (this._state.tabbrowserWidth != currentWidth) {
+        console.log("TMP> tabsplit-control - onResize");
+        this._store.update({
+          type: "update_tabbrowser_width",
+          args: { tabbrowserWidth: currentWidth  }
+        });
+      }
     });
   },
   /* The global listeners end */
@@ -480,6 +484,12 @@ TabSplit.control = {
         targetName: "_getSwitcher",
         target: gBrowser._getSwitcher,
         proxyHandler: this._getGetSwitcherProxy(),
+      },
+      {
+        targetHolder: gBrowser,
+        targetName: "addTab",
+        target: gBrowser.addTab,
+        proxyHandler: this._getAddTabProxy(),
       }
     ];
     for (let { targetHolder, targetName, target, proxyHandler } of this._chromeBehaviors) {
@@ -533,6 +543,17 @@ TabSplit.control = {
     };
     return proxy;
   },
+
+  _getAddTabProxy() {
+    let proxy = {};
+    proxy.apply = (addTab, thisArg, args) => {
+      console.log("TMP> tabsplit-control - _getAddTabProxy proxy", addTab.name);
+      let tab = addTab.call(thisArg, ...args);
+      this._view.forceUpdate();
+      return tab;
+    };
+    return proxy;
+  }
   /* Override the chrome behaviours end */
 };
 

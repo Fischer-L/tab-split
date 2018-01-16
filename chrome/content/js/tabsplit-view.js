@@ -81,7 +81,6 @@ TabSplit.view = {
     });
 
     this._tabSplitButton = win.document.getElementById(this.ID_TABSPLIT_BUTTON);
-    this._tabSplitButton.classList.add("subviewbutton-nav");
     this._tabSplitButton.setAttribute("closemenu", "none");
     this._tabSplitButton.setAttribute(
       "data-tabsplit-tabbrowser-id", this._gBrowser.getAttribute("data-tabsplit-tabbrowser-id"));
